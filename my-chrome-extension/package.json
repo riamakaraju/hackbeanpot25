@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "build": "tsc -p tsconfig.node.json",
+    "start": "node dist/background.js",
+    "watch": "tsc -p tsconfig.node.json --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
+
+
