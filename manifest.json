@@ -4,6 +4,12 @@
     "description": "Productivity app",
     "version": "1.0.0",
     "key": "xovgwpqkfjtiwymzsbhluzdwcdqmrpke", 
+    "oauth2": {
+        "client_id": "131732251365-o1hatv556s2nv04f6nmus0uoqji1orsu.apps.googleusercontent.com",
+        "scopes": [
+            "https://www.googleapis.com/auth/calendar.readonly"
+    ]
+    }
     "action": {
         "default_popup": "popup/popup.html"
     },
