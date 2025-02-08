@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "key": "xovgwpqkfjtiwymzsbhluzdwcdqmrpke", 
     "oauth2": {
-        "client_id": "131732251365-o1hatv556s2nv04f6nmus0uoqji1orsu.apps.googleusercontent.com",
+        "client_id": "303347546271-1hbpo4giu3g72047bmqe54akhssmouiu.apps.googleusercontent.com",
         "scopes": [
             "https://www.googleapis.com/auth/calendar",
             "https://www.googleapis.com/auth/calendar.readonly"
