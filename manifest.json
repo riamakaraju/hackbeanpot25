@@ -3,6 +3,7 @@
     "name": "Block-in",
     "description": "Productivity app",
     "version": "1.0.0",
+    "key": "xovgwpqkfjtiwymzsbhluzdwcdqmrpke", 
     "action": {
         "default_popup": "popup/popup.html"
     },
