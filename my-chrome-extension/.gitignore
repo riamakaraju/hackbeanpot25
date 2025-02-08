@@ -1,0 +1,32 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled TypeScript files (if applicable)
+dist/
+*.js.map
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Ignore Chrome Extension build files
+*.crx
+*.pem
+*.zip
+
+# Ignore environment and sensitive files
+.env
+secrets.json
+
+# Ignore build and dependency files
+node_modules/
+
+# Allow tsconfig.node.json
+!.gitignore
+!tsconfig.node.json
+
