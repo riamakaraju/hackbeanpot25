@@ -47,8 +47,8 @@ const updateUI = (isRunning) => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const tabId = tabs[0].id;
             chrome.scripting.executeScript({
-              target: { tabId: tabId },
-                function: () => { 
+                target: { tabId: tabId },
+                function: () => {
                     const overlay = document.createElement('div');
                     overlay.style.position = 'fixed';
                     overlay.id = 'overlay';  // Unique ID
@@ -59,50 +59,31 @@ const updateUI = (isRunning) => {
                     overlay.style.backgroundColor = '#000';  // Semi-transparent black
                     overlay.style.zIndex = '9999';  // Make sure it’s on top of other content
                     document.body.appendChild(overlay);
-                    
+
                     console.log(document.body.getinnerHTML);
-                 }
+                }
             });
             console.log('injected', tabId)
-          })
-            
-        
+        })
+
+
     } else {
         handleOnStopState()
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const tabId = tabs[0].id;
             chrome.scripting.executeScript({
-              target: { tabId: tabId },
-                function: () => { 
+                target: { tabId: tabId },
+                function: () => {
                     const overlay = document.getElementById('overlay');  // Select the overlay div
                     if (overlay) {
-                      overlay.remove();  // Removes the div
-                    }                    
-                 }
+                        overlay.remove();
+                    }
+                }
             })
         })
 
 
     }
-}
-
-let cachedToken = null;
-
-function getAuthToken() {
-    return new Promise((resolve, reject) => {
-        if (cachedToken) {
-            resolve(cachedToken);
-        } else {
-            chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
-                if (chrome.runtime.lastError) {
-                    reject(new Error("Failed to get token"));
-                } else {
-                    cachedToken = token;
-                    resolve(token);
-                }
-            });
-        }
-    });
 }
 
 let cachedToken = null;
@@ -135,25 +116,6 @@ document.getElementById('signin').addEventListener('click', () => {
             // !!!!! I PUT !!! IN FRONT OF THE MAIN METHODS WE'RE USING
             // EList == Event List
 
-            // returns next 4 events
-            const detectNextFourSearchParams = new URLSearchParams({
-                "orderBy": "startTime",
-                "singleEvents": "true",
-                "maxResults": "4",
-                "timeMin": new Date().toISOString()  // Get only future events
-            })
-
-            // takes in a list of 4 and a boolean (MUST BE A LIST OF 4)
-            const detectNextThreeEventsHelp = (eList, useFirst) => {
-                let increment = 0;
-                if (!useFirst) increment = increment + 1;
-                const res = new URLSearchParams();
-                for (let i = 0 + increment; i < 3 + increment; i++) {
-                    res.append(eList[i]);
-                }
-                return res;
-            }
-
             // helper for detectCurr
             const detectCurrHelper = new URLSearchParams({
                 "orderBy": "startTime",
@@ -175,18 +137,56 @@ document.getElementById('signin').addEventListener('click', () => {
                 return "None";
             }
 
-             // Perform the fetch request to get events (or other data)
-             fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?' + queryParams.toString(), {
-                method: 'GET',
-                headers: headers
+            const detectNextFourEvents = () => {
+                return fetchEvents(detectNextFourSearchParams);
+            }
+
+            // returns next 4 events
+            const detectNextFourSearchParams = new URLSearchParams({
+                "orderBy": "startTime",
+                "singleEvents": "true",
+                "maxResults": "4",
+                "timeMin": new Date().toISOString()  // Get only future events
             })
-                .then((response) => response.json()) // Parse the response into JSON
-                .then(function (data) {
-                    const events = data.items;
-                })
-                .catch(function (error) {
-                    console.log('Error fetching events:', error);
+
+            // takes in a list of 4 and a boolean (MUST BE A LIST OF 4)
+            const detectNextThreeEventsHelp = (eList, useFirst) => {
+                let increment = 0;
+                if (!useFirst) increment = increment + 1;
+                const res = new URLSearchParams();
+                for (let i = 0 + increment; i < 3 + increment; i++) {
+                    res.append(eList[i]);
+                }
+                return res;
+            }
+
+            // !!!! returns next 3 events
+            const detectNextThreeEvents = () => {
+                let useFirst = false;
+                if (detectCurr().equals("None")) useFirst = true;
+                return detectNextThreeEventsHelp(detectNextFourEvents(), useFirst);
+            }
+
+            // Reusable function to fetch events
+            function fetchEvents(queryParams) {
+                const headers = new Headers({
+                    'Authorization': 'Bearer ' + cachedToken,
+                    'Content-Type': 'application/json'
                 });
+
+                return fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?' + queryParams.toString(), {
+                    method: 'GET',
+                    headers: headers
+                })
+                    .then((response) => response.json())
+                    .then(function (data) {
+                        return data.items;
+                    })
+                    .catch(function (error) {
+                        console.log('Error fetching events:', error);
+                        return [];
+                    });
+            }
         });
 })
 
@@ -200,10 +200,10 @@ const EListToString = (Elist) => {
 */
 
 const websitesAdded = []
-const isActive = false; 
+const isActive = false;
 
 const isBlocked = (url) => {
-    if(websitesAdded.includes(url)){
+    if (websitesAdded.includes(url)) {
         /*let registerScripts = {
             id: 'test',
             "matches" : websitesAdded,
@@ -213,18 +213,18 @@ const isBlocked = (url) => {
         };
        chrome.scripting.registerContentScripts([registerScripts]).then(() => {
         })      } */
-       return true;
-}
-    else {return false};
+        return true;
+    }
+    else { return false };
 }
 
-function addWebsite(){
+function addWebsite() {
     let input = document.getElementById("websiteadd").value;
     websitesAdded.push(input);
     isBlocked(input)
 }
 
-function windowurlListen(){
+function windowurlListen() {
     isBlocked(HashChangeEvent.newURL);
     console.log("tab changed")
 }
