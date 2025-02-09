@@ -41,11 +41,55 @@ const handleOnStopState = () => {
     hideElement(activeTagElement)
 }
 
+async function getCurrentTab() {
+    let queryOptions = { active: true, lastFocusedWindow: true };
+    // `tab` will either be a `tabs.Tab` instance or `undefined`.
+    let [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+  }
+
 const updateUI = (isRunning) => {
     if (isRunning) {
         handleOnStartState()
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tabId = tabs[0].id;
+            chrome.scripting.executeScript({
+              target: { tabId: tabId },
+                function: () => { 
+                    const overlay = document.createElement('div');
+                    overlay.style.position = 'fixed';
+                    overlay.id = 'overlay';  // Unique ID
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.width = '100%';
+                    overlay.style.height = '100%';
+                    overlay.style.backgroundColor = '#000';  // Semi-transparent black
+                    overlay.style.zIndex = '9999';  // Make sure it’s on top of other content
+                    document.body.appendChild(overlay);
+                    
+                    console.log(document.body.getinnerHTML);
+                 }
+            });
+            console.log('injected', tabId)
+          })
+            
+        
     } else {
         handleOnStopState()
+
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tabId = tabs[0].id;
+            chrome.scripting.executeScript({
+              target: { tabId: tabId },
+                function: () => { 
+                    const overlay = document.getElementById('overlay');  // Select the overlay div
+                    if (overlay) {
+                      overlay.remove();  // Removes the div
+                    }                    
+                 }
+            })
+        })
+
     }
 }
 

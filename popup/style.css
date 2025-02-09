@@ -6,6 +6,9 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: white !important;
+  font-size: x-large !important;
+  color: red !important;
 }
 
 /* Style for event titles */
@@ -16,7 +19,7 @@ html, body {
 
 /* Popup styling */
 .popup {
-  background-color: rgba(154, 103, 134, 0.5); /* Transparent background */
+  background-color: rgba(154, 103, 134, 0.5) !important; /* Transparent background */
   display: flex;
   justify-content: center;
   align-items: center;

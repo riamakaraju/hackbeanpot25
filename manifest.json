@@ -25,19 +25,21 @@
         "type": "module"
     },
     "permissions": [
-        "storage", "identity", "scripting"
+        "storage", "identity", "tabs", "activeTab", "scripting"
     ],
+
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+      ],
+
     "content_scripts": [ 
         {
         "matches": ["https://example.com/"],
 
-            "css": [
-                "popup/style.css"
-        ],
-
         "js": [
             "blocker.js"
-             ]
+        ]
 }
     ]
 }
