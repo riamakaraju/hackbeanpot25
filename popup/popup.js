@@ -238,17 +238,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`updated onBlockedWebsite to ${value}`);
     }
 
-    // Purpose: Toggles eventRunning state
-    const toggleEventRunning = () => {
-        chrome.storage.local.get(["eventRunning"], result => {
-            const eventRunning = result.eventRunning || false;
-            const newState = !eventRunning;
-
-            chrome.storage.local.set({ eventRunning: newState }, () => {
-                updateBlockState(0, newState);
-                console.log(`updated eventRunning to ${newState}`);
-            });
-        });
+    // Purpose: Edits eventRunning state with the value passed in
+    const editEventRunning = (value) => {
+        updateBlockState(0, value);
+        console.log(`updated eventRunning to ${value}`);
     }
 
     const websitesAdded = []
@@ -262,6 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
+
+    // Returns true if url is part of blocklist, uses a callback for some saving stuff.
+    const isBlockedWithCallback = (url, callback) => {
+        chrome.storage.local.get(["urlList"], result => {
+            const urls = result.urlList || [];
+            console.log(urls.includes(url));
+            callback(urls.includes(url));  // Pass the result to the callback
+        });
+    }
    
     
     const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
@@ -392,12 +394,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('eventStatus').innerText = status;
     };
 
-    const checkCurrentWebsite = async () => {
+    const checkCurrentWebsite = () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const currentUrl = tabs[0].url;  // The URL of the active tab
-            console.log(`Current website url: ${currentUrl}`);
-            console.log(isBlocked(currentUrl));
-            editOnBlockedWebsite(isBlocked(currentUrl));
+            
+            // Call isBlocked with a callback that updates the state
+            isBlocked(currentUrl, (blocked) => {
+                editOnBlockedWebsite(blocked);  // Pass the result to update state
+            });
         });
     }
 
