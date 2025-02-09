@@ -28,15 +28,20 @@
         "storage", "identity"
     ],
     "content_scripts": [ 
-        {
-            "matches": [
-      "https://www.facebook.com/*",
-      "https://www.netflix.com/*",
-      "https://www.youtube.com/*"
-    ],
-    "css": [
-      "popup/style.css"
-    ]
-}
+    {
+        "matches": [
+        "https://www.facebook.com/*",
+        "https://www.netflix.com/*",
+        "https://www.youtube.com/*"
+        ],
+
+        "css": [
+        "popup/style.css"
+        ],
+
+        "js": [
+            "blocker.js"
+        ]
+    }
     ]
 }
