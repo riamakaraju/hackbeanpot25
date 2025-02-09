@@ -105,8 +105,6 @@ function getAuthToken() {
     });
 }
 
-let cachedToken = null;
-
 function getAuthToken() {
     return new Promise((resolve, reject) => {
         if (cachedToken) {
