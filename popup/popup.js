@@ -44,6 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').innerText = now.toLocaleTimeString();
+      }
+      updateTime();
+      setInterval(updateTime, 1000);      
+
     const fetchEvents = async (queryParams) => {
         // Ensure token is available
         if (!cachedToken) {
