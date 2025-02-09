@@ -1,4 +1,5 @@
 document.getElementById("clicked").addEventListener("click", addWebsite);
+addEventListener("hashchange", windowurlListen);
 
 const toggleExtensionState = () => {
     chrome.storage.local.get(["isRunning"], result => {
@@ -90,21 +91,31 @@ chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
     })
 })
 
-let websitesAdded = []
+const websitesAdded = []
+const isActive = false; 
+
+const isBlocked = (url) => {
+    if(websitesAdded.includes(url)){
+        /*let registerScripts = {
+            id: 'test',
+            "matches" : websitesAdded,
+            "css": [
+                    "popup/style.css"
+                ]
+        };
+       chrome.scripting.registerContentScripts([registerScripts]).then(() => {
+        })      } */
+       return true;
+    }
+    else {return false};
+}
 
 function addWebsite(){
     let input = document.getElementById("websiteadd").value;
     websitesAdded.push(input);
-    let registerScripts = {
-        id: 'test',
-        matches: websitesAdded,
-        "css": [
-                "popup/style.css"
-            ]
-        //add js
-    };
-    // registerContentScripts documentation: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/scripting/registerContentScripts
-    chrome.scripting.registerContentScripts([registerScripts]).then(() => {
-        console.log('Added content scripts for the new website');
-    })
+    isBlocked(input)
+}
+
+function windowurlListen(){
+    isBlocked(HashChangeEvent.newURL);
 }
