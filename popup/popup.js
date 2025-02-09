@@ -176,29 +176,30 @@ document.addEventListener('DOMContentLoaded', () => {
     
     
 
-    /*
+    // detects the next three events not including the current one
     const detectNextThreeEvents = async () => {
         const currentEvent = await detectCurr();
         const useFirst = currentEvent === "No events";
         const nextFourEvents = await detectNextFourEvents();
         return detectNextThreeEventsHelp(nextFourEvents, useFirst);
     };
-    */
 
-    /*
+    // helper for threeEventsString
     const eventToString = async (event) => {
-        return event.summary + "(" + 
+        return event.summary + "(" + event.dateTime.substring(5,10) + ", " + event.dateTime.substring(12,16);
     }
+    
 
+    // takes in a list of 3 events and returns list of strings
     const threeEventsString = async () => {
         let res = new Array();
         const threeEvents = await dummyDetectNextThreeEvents();
         for(let i = 0; i < threeEvents.length; i++)  {
             res.push(eventToString(threeEvents[i]));
         }
-
+        console.log("hi" + res);
+        return res;
     }
-    */
 
 
     // Event listener for signin button
