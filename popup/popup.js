@@ -1,24 +1,61 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const createEventChecker = () => {
-        return {
-            getCurrentEventStatus: async () => {
-                return await detectCurr(); // Method to get current event status
-            },
-            /*
-            getNextThreeEvents: async () => {
-                return await detectNextThreeEvents(); 
+    let cachedToken = null;
+    let tokenExpiry = null; // Store token expiry time
+
+    const getAuthToken = () => {
+        return new Promise((resolve, reject) => {
+            const now = Date.now();
+            if (cachedToken && tokenExpiry && tokenExpiry > now) {
+                console.log("Using cached token:", cachedToken);
+                resolve(cachedToken);
+                return; // Important: Exit the promise if token is valid
             }
-            */
-            getNextThreeEvents: dummyDetectNextThreeEvents 
-        };
+
+            chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
+                if (chrome.runtime.lastError) {
+                    console.error("Failed to get token:", chrome.runtime.lastError);
+                    reject(new Error("Failed to get token"));
+                    return; // Exit the callback on error
+                }
+
+                if (!token) {  // Handle null token
+                    console.error("Token is null");
+                    reject(new Error("Token is null"));
+                    return; // Exit the callback on null token
+                }
+
+                cachedToken = token;
+
+                //  Get token expiry (this requires a separate request to Google's tokeninfo endpoint)
+                fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`)
+                    .then(response => response.json())
+                    .then(tokenInfo => {
+                        tokenExpiry = Date.now() + (tokenInfo.expires_in * 1000); // Store expiry time in milliseconds
+                        console.log("Token expires in:", tokenInfo.expires_in, "seconds. Stored expiry:", tokenExpiry);
+                        resolve(token);
+                    })
+                    .catch(err => {
+                      console.error("Error getting token info:", err);
+                      reject(err); // Reject if token info fetch fails
+                    });
+
+
+            });
+        });
     };
 
     const fetchEvents = async (queryParams) => {
+        // Ensure token is available
+        if (!cachedToken) {
+            // If cachedToken is missing, fetch it
+            cachedToken = await getAuthToken();
+        }
+    
         const headers = new Headers({
             'Authorization': 'Bearer ' + cachedToken,
             'Content-Type': 'application/json'
         });
-
+    
         try {
             const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?' + queryParams.toString(), {
                 method: 'GET',
@@ -33,14 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const detectCurr = async () => {
+        const token = await getAuthToken(); 
         const detectCurrHelper = new URLSearchParams({
             "orderBy": "startTime",
             "singleEvents": "true",
             "maxResults": "1",
             "timeMin": new Date().toISOString()
         });
-
-        const res = await fetchEvents(detectCurrHelper);
+    
+        const res = await fetchEvents(detectCurrHelper, token); 
         if (res.length < 1) {
             return "No events";
         }
@@ -53,7 +91,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return "No events";
     };
     
-
+    const createEventChecker = () => {
+        return {
+            getCurrentEventStatus: async () => {
+                return await detectCurr(); // Method to get current event status
+            },
+            /*
+            getNextThreeEvents: async () => {
+                return await detectNextThreeEvents(); 
+            }
+            */
+            getNextThreeEvents: dummyDetectNextThreeEvents 
+        };
+    };
+    
     const isAllDayEvent = (event) => {
         return event.start.date && !event.start.dateTime;
     };
@@ -116,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return dummyEvents.slice(0, 3);
     };
     
+    
+
     /*
     const detectNextThreeEvents = async () => {
         const currentEvent = await detectCurr();
@@ -141,24 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
     */
 
 
-    // Get the auth token
-    let cachedToken = null;
-    function getAuthToken() {
-        return new Promise((resolve, reject) => {
-            if (cachedToken) {
-                resolve(cachedToken);
-            } else {
-                chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
-                    if (chrome.runtime.lastError) {
-                        reject(new Error("Failed to get token"));
-                    } else {
-                        cachedToken = token;
-                        resolve(token);
-                    }
-                });
-            }
-        });
-    }
 
     // Event listener for signin button
     document.getElementById('signin').addEventListener('click', () => {
