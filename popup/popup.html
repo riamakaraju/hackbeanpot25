@@ -1,1 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title</title>
+    <link rel="stylesheet" href="bulma.min.css" />
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container m-3">
+        <h1 class="title">Title again</h1>
+        <div class="field">
+            <label class="label">States</label>
+            <button onclick="toggleExtensionState()" id="activeSpan" class="tag is-success">Active</button>
+            <button onclick="toggleExtensionState()" id="inactiveSpan" class="tag is-danger">Inactive</button>
+        </div>
+        <div class="box">
+            <h2 class="subtitle">Upcoming:</h2>
+            <p>1. </p>
+            <p>2. </p>
+            <p>3. </p>
+        </div>
+        <div class="container m-3">        
+            <button class="button" id="signin">Sign into Google</button>
+        </div>
+        <div class="box">
+            <p>
+                <a href="https://calendar.google.com/calendar/u/0/r" class="has-text-link" target="_blank">My schedule</a>
+            </p>
+        </div>
+    </div>
 
+</body>
+    <script src="popup.js"></script>
+</html>

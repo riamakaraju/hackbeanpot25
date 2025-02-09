@@ -1,15 +1,68 @@
-/*document.addEventListener("DOMContentLoaded", function () {
-  // Array of event objects
-  let events = [
-      { name: "Hair Appointment", date: "Feb 10, 2025", time: "10:00 AM" },
-      { name: "Exam 3", date: "Feb 12, 2025", time: "2:00 PM" },
-      { name: "Birthday", date: "Feb 15, 2025", time: "All Day" }
-  ];
+const toggleExtensionState = () => {
+    chrome.storage.local.get(["isRunning"], result => {
+        const isRunning = result.isRunning || false
+        const newState = !isRunning
 
-  // Loop through events and update the UI
-  for (let i = 0; i < events.length; i++) {
-      let eventElement = document.getElementById(`event${i + 1}`);
-      eventElement.innerHTML = `<strong>${i + 1}. ${events[i].name}</strong><br>
-                                📅 ${events[i].date} | 🕒 ${events[i].time}`;
-  }
-});/*
+        chrome.storage.local.set({isRunning: newState} , () => {
+            updateUI(newState)
+            console.log(newState)
+        })
+    })
+}
+
+const inactiveTagElement = document.getElementById("inactiveSpan"); 
+const activeTagElement = document.getElementById("activeSpan");
+
+activeTagElement.addEventListener("click", toggleExtensionState);
+inactiveTagElement.addEventListener("click", toggleExtensionState);
+    
+chrome.storage.local.get(["isRunning"], (result) => {
+    updateUI(result.isRunning || false);
+});
+
+const hideElement = (elem) => {
+    elem.style.display = 'none'
+}
+
+const showElement = (elem) => {
+    elem.style.display = ''
+}
+
+const handleOnStartState = () => {
+    showElement(activeTagElement)
+    hideElement(inactiveTagElement)
+}
+
+const handleOnStopState = () => {
+    showElement(inactiveTagElement)
+    hideElement(activeTagElement)
+}
+
+const updateUI = (isRunning) => {
+    if (isRunning) {
+        handleOnStartState()
+    } else {
+        handleOnStopState()
+    }
+}
+
+document.getElementById('signin').addEventListener('click', () => {
+
+chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
+    const headers = new Headers({
+        'Authorization' : 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    })
+
+   console.log(token);
+  
+    const queryParams = { headers };
+  
+    fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', queryParams)
+    .then((response) => response.json()) // Transform the data into json
+    .then(function(data) {
+        console.log(data);
+      })
+
+    })
+})
