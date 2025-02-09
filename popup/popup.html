@@ -12,8 +12,8 @@
         <h1 class="title">Title again</h1>
         <div class="field">
             <label class="label">States</label>
-            <span class="tag is-success">Active</span>
-            <span class="tag is-danger">Inactive</span>
+            <button onclick="toggleExtensionState()" id="activeSpan" class="tag is-success">Active</button>
+            <button onclick="toggleExtensionState()" id="inactiveSpan" class="tag is-danger">Inactive</button>
         </div>
         <div class="box">
             <h2 class="subtitle">Upcoming:</h2>
@@ -28,7 +28,9 @@
             <p>
                 <a href="https://calendar.google.com/calendar/u/0/r" class="has-text-link" target="_blank">My schedule</a>
             </p>
+        </div>
     </div>
+
 </body>
     <script src="popup.js"></script>
 </html>

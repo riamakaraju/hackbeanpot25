@@ -1,7 +1,53 @@
-const statusTagElement = document.getElementById("statusTag");
-const inactiveTagElement = document.getElementById("inactiveTag");
-const activeTagElement = document.getElementById("activeTag");
+document.addEventListener('DOMContentLoaded', () => {
+    const inactiveTagElement = document.getElementById("inactiveSpan");
+    const activeTagElement = document.getElementById("activeSpan");
+    
+    activeTagElement.addEventListener("click", toggleExtensionState);
+    inactiveTagElement.addEventListener("click", toggleExtensionState);
+    
+    chrome.storage.local.get(["isRunning"], (result) => {
+        updateUI(result.isRunning || false);
+    });
+})
 
+const hideElement = (elem) => {
+    elem.style.display = 'none'
+}
+
+const showElement = (elem) => {
+    elem.style.display = ''
+}
+
+const handleOnStartState = () => {
+    showElement(activeTagElement)
+    hideElement(inactiveTagElement)
+}
+
+const handleOnStopState = () => {
+    showElement(inactiveTagElement)
+    hideElement(activeTagElement)
+}
+
+const toggleExtensionState = () => {
+    chrome.storage.local.get(["isRunning"], result => {
+        const isRunning = result.isRunning || false
+        const newState = !isRunning
+
+        chrome.storage.local.set({isRunning: newState} , () => {
+            updateUI(newState)
+            console.log(newState)
+        })
+    })
+}
+
+const updateUI = (isRunning) => {
+    if (isRunning) {
+        handleOnStartState()
+    } else {
+        handleOnStopState()
+    }
+}
+    
 chrome.identity.getAuthToken({ 'interactive': false }, function(token) {
     const headers = new Headers({
         'Authorization' : 'Bearer ' + token,
@@ -16,5 +62,3 @@ chrome.identity.getAuthToken({ 'interactive': false }, function(token) {
         console.log(data);
       })
     })
-
-
