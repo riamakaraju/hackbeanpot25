@@ -1,3 +1,5 @@
+document.getElementById("clicked").addEventListener("click", addWebsite);
+
 const toggleExtensionState = () => {
     chrome.storage.local.get(["isRunning"], result => {
         const isRunning = result.isRunning || false
@@ -66,3 +68,22 @@ chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
 
     })
 })
+
+let websitesAdded = []
+
+function addWebsite(){
+    let input = document.getElementById("websiteadd").value;
+    websitesAdded.push(input);
+    let registerScripts = {
+        id: 'test',
+        matches: websitesAdded,
+        "css": [
+                "popup/style.css"
+            ]
+        //add js
+    };
+    // registerContentScripts documentation: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/scripting/registerContentScripts
+    chrome.scripting.registerContentScripts([registerScripts]).then(() => {
+        console.log('Added content scripts for the new website');
+    })
+}
