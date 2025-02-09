@@ -1,19 +1,15 @@
-const statusTagElement = document.getElementById("statusTag");
-const inactiveTagElement = document.getElementById("inactiveTag");
-const activeTagElement = document.getElementById("activeTag");
+/*document.addEventListener("DOMContentLoaded", function () {
+  // Array of event objects
+  let events = [
+      { name: "Hair Appointment", date: "Feb 10, 2025", time: "10:00 AM" },
+      { name: "Exam 3", date: "Feb 12, 2025", time: "2:00 PM" },
+      { name: "Birthday", date: "Feb 15, 2025", time: "All Day" }
+  ];
 
-    chrome.identity.getAuthToken({ 'interactive': false }, function(token) {
-        const headers = new Headers({
-            'Authorization' : 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        })
-      
-        const queryParams = { headers };
-      
-        fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', queryParams)
-        .then((response) => response.json()) // Transform the data into json
-        .then(function(data) {
-            console.log(data);
-          })
-        })
-  
+  // Loop through events and update the UI
+  for (let i = 0; i < events.length; i++) {
+      let eventElement = document.getElementById(`event${i + 1}`);
+      eventElement.innerHTML = `<strong>${i + 1}. ${events[i].name}</strong><br>
+                                📅 ${events[i].date} | 🕒 ${events[i].time}`;
+  }
+});/*

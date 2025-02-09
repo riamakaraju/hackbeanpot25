@@ -1,34 +1,17 @@
-html, body {
-    width: 100%;         /* Ensure body takes full viewport width */
-    height: 100%;        /* Ensure body takes full viewport height */
-    margin: 0;           /* Remove default margin */
-    padding: 0;          /* Remove default padding */
-    display: flex;
-    justify-content: center;  /* Center the popup horizontally */
-    align-items: center;      /* Center the popup vertically */
-  }
-  
-  .popup {
-    width: 300px;        /* Popup width */
-    height: 400px;       /* Popup height */
-    background-color: rgba(0, 0, 0, 0.5);  /* Transparent background for the overlay */
-    position: fixed;     /* Fix the popup in the viewport */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .box {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 100%;           /* Ensure box takes up the full width of the popup */
-    height: 100%;          /* Ensure box takes up the full height of the popup */
-    box-sizing: border-box; /* Include padding in width/height */
-    overflow: auto;        /* Enable scrolling if content exceeds box height */
-  }
-  
+/* Ensures button aligns with other elements */
+.button-container {
+  display: flex;
+  justify-content: center;
+  width: calc(100% - 32px); /* Adjust width to account for padding */
+  padding: 0 16px; /* Equal padding on both sides */
+  margin: 0 auto; /* Center the container */
+}
+
+/* Button styling */
+.button {
+  width: 100%;
+  text-align: center;
+  padding: 12px 0;
+  margin: 0;
+  border-radius: 6px;
+}
