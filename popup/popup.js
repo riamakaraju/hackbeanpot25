@@ -49,10 +49,16 @@ const updateUI = (isRunning) => {
 }
     
 chrome.identity.getAuthToken({ 'interactive': false }, function(token) {
+document.getElementById('signin').addEventListener('click', () => {
+
+
+chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
     const headers = new Headers({
         'Authorization' : 'Bearer ' + token,
         'Content-Type': 'application/json'
     })
+
+   console.log(token);
   
     const queryParams = { headers };
   
@@ -61,4 +67,7 @@ chrome.identity.getAuthToken({ 'interactive': false }, function(token) {
     .then(function(data) {
         console.log(data);
       })
+
+
     })
+})
