@@ -86,10 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     
         const res = await fetchEvents(detectCurrHelper, token); 
+        if (res === null) {
+            return "No events";
+        }
         if (res.length < 1) {
             return "No events";
         }
         if (res[0].start.dateTime <= new Date().toISOString()) {
+            // console.log(res[0].start.dateTime);
+            // console.log(new Date().toISOString);
             return res[0].summary;
         }
         if (isAllDayEvent(res[0])) {
@@ -214,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 
-    // Toggle extension state
+    // Purpose: Toggles turns the blocker on and off using (extension state)
     const toggleExtensionState = () => {
         chrome.storage.local.get(["isRunning"], result => {
             const isRunning = result.isRunning || false;
@@ -222,10 +227,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
             chrome.storage.local.set({ isRunning: newState }, () => {
                 updateBlockState(1, newState);
-                console.log(newState);
+                console.log(`updated blockerOn to ${newState}`);
             });
         });
     };
+
+    // Purpose: Toggles onBlockedWebsite state
+    const toggleOnBlockedWebsite = () => {
+        chrome.storage.local.get(["onBlockedWebsite"], result => {
+            const onBlockedWebsite = result.onBlockedWebsite || false;
+            const newState = !onBlockedWebsite;
+
+            chrome.storage.local.set({ onBlockedWebsite: newState }, () => {
+                updateBlockState(2, newState);
+                console.log(`updated onBlockedWebsite to ${newState}`);
+            });
+        });
+    }
+
+        // Purpose: Toggles eventRunning state
+        const toggleEventRunning = () => {
+            chrome.storage.local.get(["eventRunning"], result => {
+                const eventRunning = result.eventRunning || false;
+                const newState = !eventRunning;
+    
+                chrome.storage.local.set({ eventRunning: newState }, () => {
+                    updateBlockState(0, newState);
+                    console.log(`updated eventRunning to ${newState}`);
+                });
+            });
+        }
+
 
     // Purpose: Updates the blockState based on the values passed in. Chooses to update eventRunning, blockerOn, or onBlockedWebsite
     // based on 'edit' int.
@@ -237,13 +269,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 blockerOn: edit == 1 ? value : blockState.blockerOn,
                 onBlockedWebsite: edit == 2 ? value : blockState.onBlockedWebsite,
             }
-            if (edit == 4) {
-                newState = {eventRunning: true, blockerOn: true, onBlockedWebsite: true}
-            }
 
             chrome.storage.local.set({ blockState: newState }, () => {
                 updateUI(newState);
-                console.log(newState);
+                updateToggleButton(newState);
+                console.log(`eventRunning:  ${newState.eventRunning}
+                            blockerOn: ${newState.blockerOn}
+                            onBlockedWebsite: ${newState.onBlockedWebsite}
+                            blockState literal is ${newState}`);
             })
         })
     }
@@ -254,12 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     activeTagElement.addEventListener("click", toggleExtensionState);
     inactiveTagElement.addEventListener("click", toggleExtensionState);
-
-    document.getElementById("testButton").addEventListener("click", updateBlockState(4, true));
-
-    chrome.storage.local.get(["isRunning"], (result) => {
-        updateUI(result.isRunning || false);
-    });
 
     const hideElement = (elem) => {
         elem.style.display = 'none';
@@ -288,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const updateUI = (blockState) => {
-        if (blockState.eventRunning && blockState.blockerOn && blockState.onBlockedWebsite) {
+        if (blockState.blockerOn && blockState.onBlockedWebsite && blockState.eventRunning) {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 const tabId = tabs[0].id;
                 chrome.scripting.executeScript({
