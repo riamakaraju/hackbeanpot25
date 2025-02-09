@@ -6,19 +6,19 @@ const toggleExtensionState = () => {
         const isRunning = result.isRunning || false
         const newState = !isRunning
 
-        chrome.storage.local.set({isRunning: newState} , () => {
+        chrome.storage.local.set({ isRunning: newState }, () => {
             updateUI(newState)
             console.log(newState)
         })
     })
 }
 
-const inactiveTagElement = document.getElementById("inactiveSpan"); 
+const inactiveTagElement = document.getElementById("inactiveSpan");
 const activeTagElement = document.getElementById("activeSpan");
 
 activeTagElement.addEventListener("click", toggleExtensionState);
 inactiveTagElement.addEventListener("click", toggleExtensionState);
-    
+
 chrome.storage.local.get(["isRunning"], (result) => {
     updateUI(result.isRunning || false);
 });
@@ -69,7 +69,6 @@ const updateUI = (isRunning) => {
         
     } else {
         handleOnStopState()
-
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const tabId = tabs[0].id;
             chrome.scripting.executeScript({
@@ -83,50 +82,122 @@ const updateUI = (isRunning) => {
             })
         })
 
+
     }
 }
 
-document.getElementById('signin').addEventListener('click', () => {
+let cachedToken = null;
 
-chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
-    const headers = new Headers({
-        'Authorization' : 'Bearer ' + token,
-        'Content-Type': 'application/json'
-    })
-
-   console.log(token);
-    
-    const queryParams = { headers };
-
-    // returns a String of the current event
-    // if no event returns "None" 
-    // (untested method)
-    const detectCurr = () => {
-        const res = detectCurrHelper();
-        if (res < 1) {
-            return "None";
+function getAuthToken() {
+    return new Promise((resolve, reject) => {
+        if (cachedToken) {
+            resolve(cachedToken);
+        } else {
+            chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
+                if (chrome.runtime.lastError) {
+                    reject(new Error("Failed to get token"));
+                } else {
+                    cachedToken = token;
+                    resolve(token);
+                }
+            });
         }
-        if (detectCurrHelper[0].start.dateTime <= new Date().toISOString()) {
-            return detectCurrHelper[0].summary;
-        }
-        return "None";
-    }
-
-    const detectCurrHelper = new URLSearchParams({
-        "orderBy": "startTime",
-        "singleEvents": "true",
-        "maxResults": "1",
-        "timeMin": new Date().toISOString()  // Get only future events
     });
-  
-    fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', queryParams)
-    .then((response) => response.json()) // Transform the data into json
-    .then(function(data) {
-        console.log(data);
-      })
+}
 
-    })
+let cachedToken = null;
+
+function getAuthToken() {
+    return new Promise((resolve, reject) => {
+        if (cachedToken) {
+            resolve(cachedToken);
+        } else {
+            chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
+                if (chrome.runtime.lastError) {
+                    reject(new Error("Failed to get token"));
+                } else {
+                    cachedToken = token;
+                    resolve(token);
+                }
+            });
+        }
+    });
+}
+
+document.getElementById('signin').addEventListener('click', () => {
+    getAuthToken()
+        .then(token => {
+            const headers = new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            })
+            // IMPORTANT!!!!!
+            // !!!!! I PUT !!! IN FRONT OF THE MAIN METHODS WE'RE USING
+            // EList == Event List
+
+            // returns next 4 events
+            const detectNextFourSearchParams = new URLSearchParams({
+                "orderBy": "startTime",
+                "singleEvents": "true",
+                "maxResults": "4",
+                "timeMin": new Date().toISOString()  // Get only future events
+            })
+
+            // takes in a list of 4 and a boolean (MUST BE A LIST OF 4)
+            const detectNextThreeEventsHelp = (eList, useFirst) => {
+                let increment = 0;
+                if (!useFirst) increment = increment + 1;
+                const res = new URLSearchParams();
+                for (let i = 0 + increment; i < 3 + increment; i++) {
+                    res.append(eList[i]);
+                }
+                return res;
+            }
+
+            // helper for detectCurr
+            const detectCurrHelper = new URLSearchParams({
+                "orderBy": "startTime",
+                "singleEvents": "true",
+                "maxResults": "1",
+                "timeMin": new Date().toISOString()  // Get only future events
+            });
+
+            // !!!! returns a String of the current event and if there's no event rn, it returns "None" 
+            // (untested method)
+            const detectCurr = () => {
+                const res = detectCurrHelper();
+                if (res < 1) {
+                    return "None";
+                }
+                if (detectCurrHelper[0].start.dateTime <= new Date().toISOString()) {
+                    return detectCurrHelper[0].summary;
+                }
+                return "None";
+            }
+
+             // Perform the fetch request to get events (or other data)
+             fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?' + queryParams.toString(), {
+                method: 'GET',
+                headers: headers
+            })
+                .then((response) => response.json()) // Parse the response into JSON
+                .then(function (data) {
+                    const events = data.items;
+                })
+                .catch(function (error) {
+                    console.log('Error fetching events:', error);
+                });
+        });
 })
+
+/*
+const EListToString = (Elist) => {
+    let res = new Array(Elist.length);
+    for (let i = 0; i < Elist.length; i++) {
+        res[i] = Elist
+    }
+}
+*/
 
 const websitesAdded = []
 const isActive = false; 
