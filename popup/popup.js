@@ -1,14 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Create the event checker function
     const createEventChecker = () => {
         return {
             getCurrentEventStatus: async () => {
-                return await detectCurr();  // Ensure detectCurr is in scope
+                return await detectCurr(); // Method to get current event status
+            },
+            /*
+            getNextThreeEvents: async () => {
+                return await detectNextThreeEvents(); 
             }
+            */
+            getNextThreeEvents: dummyDetectNextThreeEvents 
         };
     };
 
-    // Define all your methods inside this listener
     const fetchEvents = async (queryParams) => {
         const headers = new Headers({
             'Authorization': 'Bearer ' + cachedToken,
@@ -24,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return data.items;
         } catch (error) {
             console.log('Error fetching events:', error);
-            return [];  // Return empty array if there’s an error
+            return [];  
         }
     };
     
@@ -64,14 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return events;
     };
 
-    const detectNextFourEventsWithNull = async () => {
-        const events = await detectNextFourEvents();
-        const eventList = new Array(4).fill(null); 
-        for (let i = 0; i < eventList.length; i++) {
-            eventList[i] = events[i]; 
-        }
-        return eventList;
-    };
 
     // Next four events search params
     const detectNextFourSearchParams = new URLSearchParams({
@@ -92,12 +88,58 @@ document.addEventListener('DOMContentLoaded', () => {
         return res;
     };
 
-    const detectNextThreeEvents = async (eventList) => {
+    const dummyDetectNextThreeEvents = async () => {
+        // Dummy data for testing
+        const dummyEvents = [
+            {
+                summary: "Event 1",
+                start: { dateTime: "2025-02-10T09:00:00Z" },
+                end: { dateTime: "2025-02-10T10:00:00Z" }
+            },
+            {
+                summary: "Event 2",
+                start: { dateTime: "2025-02-10T11:00:00Z" },
+                end: { dateTime: "2025-02-10T12:00:00Z" }
+            },
+            {
+                summary: "Event 3",
+                start: { dateTime: "2025-02-10T13:00:00Z" },
+                end: { dateTime: "2025-02-10T14:00:00Z" }
+            },
+            {
+                summary: "Event 4",
+                start: { dateTime: "2025-02-10T15:00:00Z" },
+                end: { dateTime: "2025-02-10T16:00:00Z" }
+            }
+        ];
+    
+        return dummyEvents.slice(0, 3);
+    };
+    
+    /*
+    const detectNextThreeEvents = async () => {
         const currentEvent = await detectCurr();
         const useFirst = currentEvent === "No events";
-        const nextFourEvents = await detectNextFourEventsWithNull();
+        const nextFourEvents = await detectNextFourEvents();
         return detectNextThreeEventsHelp(nextFourEvents, useFirst);
     };
+    */
+
+    /*
+    const eventToString = async (event) => {
+        return event.summary + "(" + 
+    }
+
+    const threeEventsString = async () => {
+        let res = new Array();
+        const threeEvents = await dummyDetectNextThreeEvents();
+        for(let i = 0; i < threeEvents.length; i++)  {
+            res.push(eventToString(threeEvents[i]));
+        }
+
+    }
+    */
+
 
     // Get the auth token
     let cachedToken = null;
@@ -218,6 +260,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('eventStatus').innerText = status;
     };
 
+    const updateNextThreeEvents = async () => {
+        let nextEvents = await eventChecker.getNextThreeEvents();
+        let eventListText = nextEvents.map(event => `${event.summary} (${event.start.dateTime} - ${event.end.dateTime})`).join('\n');
+        document.getElementById('nextEvents').innerText = `Next 3 Events:\n${eventListText}`;
+    };
+updateNextThreeEvents();
     updateStatus();
     setInterval(updateStatus, 1000);  // Update every 1 second
 });
