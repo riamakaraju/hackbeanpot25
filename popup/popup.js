@@ -59,8 +59,8 @@ const updateUI = (isRunning) => {
                     overlay.style.backgroundColor = '#000';  // Semi-transparent black
                     overlay.style.zIndex = '9999';  // Make sure it’s on top of other content
                     document.body.appendChild(overlay);
-
-                    console.log(document.body.getinnerHTML);
+                    
+                    console.log(document.body.innerHTML);
                 }
             });
             console.log('injected', tabId)
@@ -81,8 +81,6 @@ const updateUI = (isRunning) => {
                 }
             })
         })
-
-
     }
 }
 
@@ -121,24 +119,41 @@ document.getElementById('signin').addEventListener('click', () => {
                 "orderBy": "startTime",
                 "singleEvents": "true",
                 "maxResults": "1",
-                "timeMin": new Date().toISOString()  // Get only future events
+                "timeMin": new Date().toISOString()
             });
 
             // !!!! returns a String of the current event and if there's no event rn, it returns "None" 
             // (untested method)
-            const detectCurr = () => {
-                const res = detectCurrHelper();
-                if (res < 1) {
+            const isAllDayEvent = (event) => {
+                return event.start.date && !event.start.dateTime;
+            }
+            
+            const detectCurr = async () => {
+                const res = await fetchEvents(detectCurrHelper);
+                if (res.length < 1) {
                     return "None";
                 }
-                if (detectCurrHelper[0].start.dateTime <= new Date().toISOString()) {
-                    return detectCurrHelper[0].summary;
+                if (res[0].start.dateTime <= new Date().toISOString()) {
+                    return res[0].summary;
+                }
+                if (isAllDayEvent(res[0])) {
+                    return res[0].summary;
                 }
                 return "None";
             }
 
-            const detectNextFourEvents = () => {
-                return fetchEvents(detectNextFourSearchParams);
+            const detectNextFourEvents = async () => {
+                const events = await fetchEvents(detectNextFourSearchParams);
+                return events
+            }
+
+            const detectNextFourEventsWithNull = async () => {
+                const events = await detectNextFourEvents();
+                const eventList = new Array(4).fill(null); 
+                for(let i = 0; i < eventList.length; i++) {
+                    eventList[i] = events[i]; 
+                }
+                return eventList;
             }
 
             // returns next 4 events
@@ -146,25 +161,26 @@ document.getElementById('signin').addEventListener('click', () => {
                 "orderBy": "startTime",
                 "singleEvents": "true",
                 "maxResults": "4",
-                "timeMin": new Date().toISOString()  // Get only future events
+                "timeMin": new Date().toISOString()
             })
 
             // takes in a list of 4 and a boolean (MUST BE A LIST OF 4)
             const detectNextThreeEventsHelp = (eList, useFirst) => {
                 let increment = 0;
                 if (!useFirst) increment = increment + 1;
-                const res = new URLSearchParams();
-                for (let i = 0 + increment; i < 3 + increment; i++) {
-                    res.append(eList[i]);
+                const res = new Array(3);
+                for (let i = 0 + increment; i < 3; i++) {
+                    res[i] = eList[i];
                 }
                 return res;
             }
 
             // !!!! returns next 3 events
-            const detectNextThreeEvents = () => {
-                let useFirst = false;
-                if (detectCurr().equals("None")) useFirst = true;
-                return detectNextThreeEventsHelp(detectNextFourEvents(), useFirst);
+            const detectNextThreeEvents = async (eventList) => {
+                const currentEvent = await detectCurr();
+                const useFirst = currentEvent === "None";
+                const nextFourEvents = await detectNextFourEventsWithNull();
+                return detectNextThreeEventsHelp(nextFourEvents, useFirst);
             }
 
             // Reusable function to fetch events
