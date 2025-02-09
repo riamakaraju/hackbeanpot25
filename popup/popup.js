@@ -13,6 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').innerText = now.toLocaleTimeString();
+      }
+      updateTime();
+      setInterval(updateTime, 1000);      
+
     const fetchEvents = async (queryParams) => {
         const headers = new Headers({
             'Authorization': 'Bearer ' + cachedToken,
