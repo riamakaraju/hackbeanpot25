@@ -155,4 +155,5 @@ function addWebsite(){
 
 function windowurlListen(){
     isBlocked(HashChangeEvent.newURL);
+    console.log("tab changed")
 }
