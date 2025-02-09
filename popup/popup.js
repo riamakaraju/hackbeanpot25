@@ -220,11 +220,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const newState = !isRunning;
 
             chrome.storage.local.set({ isRunning: newState }, () => {
-                updateUI(newState);
+                updateBlockState(1, newState);
                 console.log(newState);
             });
         });
     };
+
+    // Purpose: Updates the blockState based on the values passed in. Chooses to update eventRunning, blockerOn, or onBlockedWebsite
+    // based on 'edit' int.
+    const updateBlockState = (edit, value) => {
+        chrome.storage.local.get(["blockState"], result => {
+            const blockState = result.blockState || {eventRunning: false, blockerOn: false, onBlockedWebsite: false};
+            const newState = {
+                eventRunning: edit == 0 ? value : blockState.eventRunning,
+                blockerOn: edit == 1 ? value : blockState.blockerOn,
+                onBlockedWebsite: edit == 2 ? value : blockState.onBlockedWebsite,
+            }
+            if (edit == 4) {
+                newState = {eventRunning: true, blockerOn: true, onBlockedWebsite: true}
+            }
+
+            chrome.storage.local.set({ blockState: newState }, () => {
+                updateUI(newState);
+                console.log(newState);
+            })
+        })
+    }
 
     // Elements
     const inactiveTagElement = document.getElementById("inactiveSpan");
@@ -232,6 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     activeTagElement.addEventListener("click", toggleExtensionState);
     inactiveTagElement.addEventListener("click", toggleExtensionState);
+
+    document.getElementById("testButton").addEventListener("click", updateBlockState(4, true));
 
     chrome.storage.local.get(["isRunning"], (result) => {
         updateUI(result.isRunning || false);
@@ -255,9 +278,16 @@ document.addEventListener('DOMContentLoaded', () => {
         hideElement(activeTagElement);
     };
 
-    const updateUI = (isRunning) => {
-        if (isRunning) {
+    const updateToggleButton = (blockState) => {
+        if (blockState.blockerOn) {
             handleOnStartState();
+        } else {
+            handleOnStopState();
+        }
+    }
+
+    const updateUI = (blockState) => {
+        if (blockState.eventRunning && blockState.blockerOn && blockState.onBlockedWebsite) {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 const tabId = tabs[0].id;
                 chrome.scripting.executeScript({
@@ -277,7 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         } else {
-            handleOnStopState();
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 const tabId = tabs[0].id;
                 chrome.scripting.executeScript({
