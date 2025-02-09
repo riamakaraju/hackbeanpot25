@@ -233,30 +233,55 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Purpose: Toggles onBlockedWebsite state
-    const toggleOnBlockedWebsite = () => {
-        chrome.storage.local.get(["onBlockedWebsite"], result => {
-            const onBlockedWebsite = result.onBlockedWebsite || false;
-            const newState = !onBlockedWebsite;
+    const editOnBlockedWebsite = (value) => {
+        updateBlockState(2, value);
+        console.log(`updated onBlockedWebsite to ${value}`);
+    }
 
-            chrome.storage.local.set({ onBlockedWebsite: newState }, () => {
-                updateBlockState(2, newState);
-                console.log(`updated onBlockedWebsite to ${newState}`);
+    // Purpose: Toggles eventRunning state
+    const toggleEventRunning = () => {
+        chrome.storage.local.get(["eventRunning"], result => {
+            const eventRunning = result.eventRunning || false;
+            const newState = !eventRunning;
+
+            chrome.storage.local.set({ eventRunning: newState }, () => {
+                updateBlockState(0, newState);
+                console.log(`updated eventRunning to ${newState}`);
             });
         });
     }
 
-        // Purpose: Toggles eventRunning state
-        const toggleEventRunning = () => {
-            chrome.storage.local.get(["eventRunning"], result => {
-                const eventRunning = result.eventRunning || false;
-                const newState = !eventRunning;
+    const websitesAdded = []
+    const isActive = false; 
+
+    // Returns true if url is part of blocklist. Also updates the onBlockedWebsite state accordingly.
+    const isBlocked = (url) => {
+        chrome.storage.local.get(["urlList"], result => {
+            const urls = result.urlList || [];
+            editOnBlockedWebsite(urls.includes(url));
+            
+            return urls.includes(url);
+        })
+    }
     
-                chrome.storage.local.set({ eventRunning: newState }, () => {
-                    updateBlockState(0, newState);
-                    console.log(`updated eventRunning to ${newState}`);
-                });
-            });
+    function addWebsite() {
+        let input = document.getElementById("websiteadd").value;
+        console.log(input)
+            if (!isBlocked(input)) {
+                chrome.storage.local.get(["urlList"], result => {
+                    const urls = result.urlList || [];
+                    urls.push(input);
+                    console.log(`urlsssss: ${urls}`);
+                    chrome.storage.local.set({ urlList: urls });
+                    input.value = '';
+                })
         }
+    }
+    
+    function windowurlListen(){
+        isBlocked(HashChangeEvent.newURL);
+        console.log("tab changed")
+    }
 
 
     // Purpose: Updates the blockState based on the values passed in. Chooses to update eventRunning, blockerOn, or onBlockedWebsite
@@ -273,7 +298,8 @@ document.addEventListener('DOMContentLoaded', () => {
             chrome.storage.local.set({ blockState: newState }, () => {
                 updateUI(newState);
                 updateToggleButton(newState);
-                console.log(`eventRunning:  ${newState.eventRunning}
+                console.log(`
+                            eventRunning:  ${newState.eventRunning}
                             blockerOn: ${newState.blockerOn}
                             onBlockedWebsite: ${newState.onBlockedWebsite}
                             blockState literal is ${newState}`);
@@ -284,9 +310,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const inactiveTagElement = document.getElementById("inactiveSpan");
     const activeTagElement = document.getElementById("activeSpan");
+    const addWebsiteConfirm = document.getElementById("clicked");
 
     activeTagElement.addEventListener("click", toggleExtensionState);
     inactiveTagElement.addEventListener("click", toggleExtensionState);
+    addWebsiteConfirm.addEventListener("click", addWebsite())
 
     const hideElement = (elem) => {
         elem.style.display = 'none';
