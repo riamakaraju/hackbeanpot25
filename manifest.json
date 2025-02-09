@@ -31,15 +31,7 @@
     "host_permissions": [
         "http://*/*",
         "https://*/*"
-      ],
+      ]
 
-    "content_scripts": [ 
-        {
-        "matches": ["https://example.com/"],
 
-        "js": [
-            "blocker.js"
-        ]
-}
-    ]
 }
