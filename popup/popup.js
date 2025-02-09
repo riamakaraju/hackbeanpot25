@@ -20,18 +20,18 @@ chrome.storage.local.get(["isRunning"], (result) => {
     updateUI(result.isRunning || false);
 });
 
-const hideElement = (elem) => {
-    elem.style.display = 'none'
-}
+    const hideElement = (elem) => {
+        elem.style.display = 'none'
+    }
 
-const showElement = (elem) => {
-    elem.style.display = ''
-}
+    const showElement = (elem) => {
+        elem.style.display = ''
+    }
 
-const handleOnStartState = () => {
-    showElement(activeTagElement)
-    hideElement(inactiveTagElement)
-}
+    const handleOnStartState = () => {
+        showElement(activeTagElement)
+        hideElement(inactiveTagElement)
+    }
 
 const handleOnStopState = () => {
     showElement(inactiveTagElement)
