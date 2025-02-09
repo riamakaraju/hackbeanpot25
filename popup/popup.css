@@ -1,17 +1,39 @@
-/* Ensures button aligns with other elements */
-.button-container {
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
   display: flex;
-  justify-content: center;
-  width: calc(100% - 32px); /* Adjust width to account for padding */
-  padding: 0 16px; /* Equal padding on both sides */
-  margin: 0 auto; /* Center the container */
+  justify-content: center;  /* Center horizontally */
+  align-items: center;      /* Center vertically */
 }
 
-/* Button styling */
-.button {
-  width: 100%;
-  text-align: center;
-  padding: 12px 0;
-  margin: 0;
-  border-radius: 6px;
+/* Style for the box inside the pop-up */
+.box {
+  width: 300px;
+  height: auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+/* Close button styling */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgb(109, 182, 255);
+  color: white;
+  border: none;
+  font-size: 16px;
+  padding: 5px;
+  cursor: pointer;
+}
+.sign-in-btn {
+  text-align: center; /* This will center the button horizontally */
+  margin-bottom: 15px;
 }
