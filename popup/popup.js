@@ -201,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
     */
 
 
-
     // Event listener for signin button
     document.getElementById('signin').addEventListener('click', () => {
         getAuthToken()
