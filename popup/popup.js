@@ -259,14 +259,17 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.get(["urlList"], result => {
             const urls = result.urlList || [];
             editOnBlockedWebsite(urls.includes(url));
-            
+
             return urls.includes(url);
         })
     }
     
+    const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
+
     function addWebsite() {
-        let input = document.getElementById("websiteadd").value;
-        console.log(input)
+        let input = document.getElementById("websiteAdd").value;
+        if (urlPattern.test(input)) {
+            console.log(`Valid URL (${input})`);
             if (!isBlocked(input)) {
                 chrome.storage.local.get(["urlList"], result => {
                     const urls = result.urlList || [];
@@ -275,6 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     chrome.storage.local.set({ urlList: urls });
                     input.value = '';
                 })
+            }
+        } else {
+            console.log(`Invalid URL (${input})`);
         }
     }
     
@@ -314,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     activeTagElement.addEventListener("click", toggleExtensionState);
     inactiveTagElement.addEventListener("click", toggleExtensionState);
-    addWebsiteConfirm.addEventListener("click", addWebsite())
+    addWebsiteConfirm.addEventListener("click", addWebsite);
 
     const hideElement = (elem) => {
         elem.style.display = 'none';
