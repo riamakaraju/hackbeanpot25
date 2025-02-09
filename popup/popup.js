@@ -55,8 +55,29 @@ chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
     })
 
    console.log(token);
-  
+    
     const queryParams = { headers };
+
+    // returns a String of the current event
+    // if no event returns "None" 
+    // (untested method)
+    const detectCurr = () => {
+        const res = detectCurrHelper();
+        if (res < 1) {
+            return "None";
+        }
+        if (detectCurrHelper[0].start.dateTime <= new Date().toISOString()) {
+            return detectCurrHelper[0].summary;
+        }
+        return "None";
+    }
+
+    const detectCurrHelper = new URLSearchParams({
+        "orderBy": "startTime",
+        "singleEvents": "true",
+        "maxResults": "1",
+        "timeMin": new Date().toISOString()  // Get only future events
+    });
   
     fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', queryParams)
     .then((response) => response.json()) // Transform the data into json
