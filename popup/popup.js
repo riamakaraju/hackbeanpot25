@@ -1,14 +1,24 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const inactiveTagElement = document.getElementById("inactiveSpan");
-    const activeTagElement = document.getElementById("activeSpan");
+const toggleExtensionState = () => {
+    chrome.storage.local.get(["isRunning"], result => {
+        const isRunning = result.isRunning || false
+        const newState = !isRunning
+
+        chrome.storage.local.set({isRunning: newState} , () => {
+            updateUI(newState)
+            console.log(newState)
+        })
+    })
+}
+
+const inactiveTagElement = document.getElementById("inactiveSpan"); 
+const activeTagElement = document.getElementById("activeSpan");
+
+activeTagElement.addEventListener("click", toggleExtensionState);
+inactiveTagElement.addEventListener("click", toggleExtensionState);
     
-    activeTagElement.addEventListener("click", toggleExtensionState);
-    inactiveTagElement.addEventListener("click", toggleExtensionState);
-    
-    chrome.storage.local.get(["isRunning"], (result) => {
-        updateUI(result.isRunning || false);
-    });
-})
+chrome.storage.local.get(["isRunning"], (result) => {
+    updateUI(result.isRunning || false);
+});
 
 const hideElement = (elem) => {
     elem.style.display = 'none'
@@ -28,18 +38,6 @@ const handleOnStopState = () => {
     hideElement(activeTagElement)
 }
 
-const toggleExtensionState = () => {
-    chrome.storage.local.get(["isRunning"], result => {
-        const isRunning = result.isRunning || false
-        const newState = !isRunning
-
-        chrome.storage.local.set({isRunning: newState} , () => {
-            updateUI(newState)
-            console.log(newState)
-        })
-    })
-}
-
 const updateUI = (isRunning) => {
     if (isRunning) {
         handleOnStartState()
@@ -47,9 +45,8 @@ const updateUI = (isRunning) => {
         handleOnStopState()
     }
 }
-    
-document.getElementById('signin').addEventListener('click', () => {
 
+document.getElementById('signin').addEventListener('click', () => {
 
     chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
         const headers = new Headers({
@@ -69,5 +66,5 @@ document.getElementById('signin').addEventListener('click', () => {
     
     
         })
-    })
+})
     
