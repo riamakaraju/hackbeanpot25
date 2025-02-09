@@ -87,20 +87,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
         const res = await fetchEvents(detectCurrHelper, token); 
         if (res === null) {
+            editEventRunning(false);
             return "No events";
         }
         if (res.length < 1) {
+            editEventRunning(false);
             return "No events";
         }
-        if (res[0].start.dateTime <= new Date().toISOString()) {
-            // console.log(res[0].start.dateTime);
-            // console.log(new Date().toISOString);
+        if (new Date(res[0].start.dateTime) <= new Date()) {
+            editEventRunning(true);
             return res[0].summary;
-        }
-        if (isAllDayEvent(res[0])) {
+        } else if (isAllDayEvent(res[0])) {
+            editEventRunning(true);
             return res[0].summary;
+        } else {
+            editEventRunning(false);
+            return "No events";
         }
-        return "No events";
+        
     };
     
     const createEventChecker = () => {
@@ -399,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentUrl = tabs[0].url;  // The URL of the active tab
             
             // Call isBlocked with a callback that updates the state
-            isBlocked(currentUrl, (blocked) => {
+            isBlockedWithCallback(currentUrl, (blocked) => {
                 editOnBlockedWebsite(blocked);  // Pass the result to update state
             });
         });
