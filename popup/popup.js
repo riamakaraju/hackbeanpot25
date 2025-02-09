@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const updateUI = (blockState) => {
-        if (blockState.blockerOn && blockState.onBlockedWebsite && blockState.eventRunning) {
+        if (blockState.blockerOn && blockState.onBlockedWebsite && blockState.eventRunning && ! document.getElementById("overlay")) {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 const tabId = tabs[0].id;
                 chrome.scripting.executeScript({
