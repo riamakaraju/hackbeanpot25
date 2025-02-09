@@ -394,11 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const eventChecker = createEventChecker();
 
     const updateStatus = async () => {
-        let event = await eventChecker.getCurrentEvent();
-        let startTime = event.start.dateTime || event.start.date; // Get start time
-        let endTime = event.end.dateTime || event.end.date; // Get end time
-        
-        document.getElementById('eventStatus').innerText = `${event} Scheduled from ${startTime} to ${endTime}`;
+        let status = await eventChecker.getCurrentEventStatus();
+        document.getElementById('eventStatus').innerText = status;
     };
     
 
