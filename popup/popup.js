@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Purpose: Toggles onBlockedWebsite state
+    // Purpose: Edits onBlockedWebsite state to the boolean passed in
     const editOnBlockedWebsite = (value) => {
         updateBlockState(2, value);
         console.log(`updated onBlockedWebsite to ${value}`);
@@ -254,15 +254,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const websitesAdded = []
     const isActive = false; 
 
-    // Returns true if url is part of blocklist. Also updates the onBlockedWebsite state accordingly.
+    // Returns true if url is part of blocklist. 
     const isBlocked = (url) => {
         chrome.storage.local.get(["urlList"], result => {
             const urls = result.urlList || [];
-            editOnBlockedWebsite(urls.includes(url));
-
             return urls.includes(url);
         })
     }
+
+   
     
     const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
 
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chrome.storage.local.get(["urlList"], result => {
                     const urls = result.urlList || [];
                     urls.push(input);
-                    console.log(`urlsssss: ${urls}`);
+                    console.log(`Updated blocklist. URLs: ${urls}`);
                     chrome.storage.local.set({ urlList: urls });
                     input.value = '';
                 })
@@ -392,12 +392,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('eventStatus').innerText = status;
     };
 
+    const checkCurrentWebsite = async () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const currentUrl = tabs[0].url;  // The URL of the active tab
+            console.log(`Current website url: ${currentUrl}`);
+            console.log(isBlocked(currentUrl));
+            editOnBlockedWebsite(isBlocked(currentUrl));
+        });
+    }
+
     const updateNextThreeEvents = async () => {
         let nextEvents = await eventChecker.getNextThreeEvents();
         let eventListText = nextEvents.map(event => `${event.summary} (${event.start.dateTime} - ${event.end.dateTime})`).join('\n');
         document.getElementById('nextEvents').innerText = `Next 3 Events:\n${eventListText}`;
     };
-updateNextThreeEvents();
+    updateNextThreeEvents();
     updateStatus();
     setInterval(updateStatus, 1000);  // Update every 1 second
+    setInterval(checkCurrentWebsite, 1000); // Checks current website every second
 });
