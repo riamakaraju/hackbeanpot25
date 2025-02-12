@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let cachedToken = null;
     let tokenExpiry = null; // Store token expiry time
 
+    chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
+        console.log("HELLLLOO" + token); // Print the token to the console
+    });
+
     const getAuthToken = () => {
         return new Promise((resolve, reject) => {
             const now = Date.now();
@@ -35,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         resolve(token);
                     })
                     .catch(err => {
-                      console.error("Error getting token info:", err);
-                      reject(err); // Reject if token info fetch fails
+                        console.error("Error getting token info:", err);
+                        reject(err); // Reject if token info fetch fails
                     });
 
 
@@ -47,9 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateTime() {
         const now = new Date();
         document.getElementById('currentTime').innerText = now.toLocaleTimeString();
-      }
-      updateTime();
-      setInterval(updateTime, 1000);      
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
 
     const fetchEvents = async (queryParams) => {
         // Ensure token is available
@@ -57,12 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // If cachedToken is missing, fetch it
             cachedToken = await getAuthToken();
         }
-    
+
         const headers = new Headers({
             'Authorization': 'Bearer ' + cachedToken,
             'Content-Type': 'application/json'
         });
-    
+
         try {
             const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?' + queryParams.toString(), {
                 method: 'GET',
@@ -72,20 +76,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return data.items;
         } catch (error) {
             console.log('Error fetching events:', error);
-            return [];  
+            return [];
         }
     };
-    
+
     const detectCurr = async () => {
-        const token = await getAuthToken(); 
+        const token = await getAuthToken();
         const detectCurrHelper = new URLSearchParams({
             "orderBy": "startTime",
             "singleEvents": "true",
             "maxResults": "1",
             "timeMin": new Date().toISOString()
         });
-    
-        const res = await fetchEvents(detectCurrHelper, token); 
+
+        const res = await fetchEvents(detectCurrHelper, token);
         if (res === null) {
             editEventRunning(false);
             return "No events";
@@ -104,9 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
             editEventRunning(false);
             return "No events";
         }
-        
+
     };
-    
+
     const createEventChecker = () => {
         return {
             getCurrentEventStatus: async () => {
@@ -117,10 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return await detectNextThreeEvents(); 
             }
             */
-            getNextThreeEvents: dummyDetectNextThreeEvents 
+            getNextThreeEvents: dummyDetectNextThreeEvents
         };
     };
-    
+
     const isAllDayEvent = (event) => {
         return event.start.date && !event.start.dateTime;
     };
@@ -179,11 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 end: { dateTime: "2025-02-10T16:00:00Z" }
             }
         ];
-    
+
         return dummyEvents.slice(0, 3);
     };
-    
-    
+
+
 
     // detects the next three events not including the current one
     const detectNextThreeEvents = async () => {
@@ -194,20 +198,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // helper for threeEventsString
-    const eventToString = async (event) => {
-        return event.summary + "(" + event.dateTime.substring(5,10) + ", " + event.dateTime.substring(12,16);
+    const eventToString = (event) => {
+        console.log("EVENT ------", event);
+        console.log("DATE TIME ----- ", event.start.dateTime);
+        return event.summary + " (" + event.start.dateTime.substring(5, 10) + ", " + event.start.dateTime.substring(12, 16) + ")";
     }
-    
+
 
     // takes in a list of 3 events and returns list of strings
     const threeEventsString = async () => {
         let res = new Array();
-        const threeEvents = await dummyDetectNextThreeEvents();
-        for(let i = 0; i < threeEvents.length; i++)  {
-            res.push(eventToString(threeEvents[i]));
+        const threeEvents = await detectNextThreeEvents();
+        const eventList = document.getElementById('eventList');
+        let html = '';
+        for (let i = 0; i < threeEvents.length; i++) {
+            html += '<li>' + eventToString(threeEvents[i]) + '</li>';
         }
-        console.log("hi" + res);
-        return res;
+        eventList.innerHTML = html;
     }
 
 
@@ -231,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             chrome.storage.local.set({ isRunning: newState }, () => {
                 updateBlockState(1, newState);
-                console.log(`updated blockerOn to ${newState}`);
+                // console.log(`updated blockerOn to ${newState}`);
             });
         });
     };
@@ -239,17 +246,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Purpose: Edits onBlockedWebsite state to the boolean passed in
     const editOnBlockedWebsite = (value) => {
         updateBlockState(2, value);
-        console.log(`updated onBlockedWebsite to ${value}`);
+        // console.log(`updated onBlockedWebsite to ${value}`);
     }
 
     // Purpose: Edits eventRunning state with the value passed in
     const editEventRunning = (value) => {
         updateBlockState(0, value);
-        console.log(`updated eventRunning to ${value}`);
+        // console.log(`updated eventRunning to ${value}`);
     }
 
     const websitesAdded = []
-    const isActive = false; 
+    const isActive = false;
 
     // Returns true if url is part of blocklist. 
     const isBlocked = (url) => {
@@ -264,35 +271,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const isBlockedWithCallback = (url, callback) => {
         chrome.storage.local.get(["urlList"], result => {
             const urls = result.urlList || [];
-            console.log(urls.includes(url));
+            // console.log(urls.includes(url));
             callback(urls.includes(url));  // Pass the result to the callback
         });
     }
-   
-    
+
+
     const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
 
     function addWebsite() {
         let input = document.getElementById("websiteAdd").value;
         if (urlPattern.test(input)) {
-            console.log(`Valid URL (${input})`);
+            // console.log(`Valid URL (${input})`);
             if (!isBlocked(input)) {
                 chrome.storage.local.get(["urlList"], result => {
                     const urls = result.urlList || [];
                     urls.push(input);
-                    console.log(`Updated blocklist. URLs: ${urls}`);
+                    // console.log(`Updated blocklist. URLs: ${urls}`);
                     chrome.storage.local.set({ urlList: urls });
                     input.value = '';
                 })
             }
         } else {
-            console.log(`Invalid URL (${input})`);
+            // console.log(`Invalid URL (${input})`);
         }
     }
-    
-    function windowurlListen(){
+
+    function windowurlListen() {
         isBlocked(HashChangeEvent.newURL);
-        console.log("tab changed")
+        // console.log("tab changed")
     }
 
 
@@ -300,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // based on 'edit' int.
     const updateBlockState = (edit, value) => {
         chrome.storage.local.get(["blockState"], result => {
-            const blockState = result.blockState || {eventRunning: false, blockerOn: false, onBlockedWebsite: false};
+            const blockState = result.blockState || { eventRunning: false, blockerOn: false, onBlockedWebsite: false };
             const newState = {
                 eventRunning: edit == 0 ? value : blockState.eventRunning,
                 blockerOn: edit == 1 ? value : blockState.blockerOn,
@@ -355,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const updateUI = (blockState) => {
-        if (blockState.blockerOn && blockState.onBlockedWebsite && blockState.eventRunning && ! document.getElementById("overlay")) {
+        if (blockState.blockerOn && blockState.onBlockedWebsite && blockState.eventRunning && !document.getElementById("overlay")) {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 const tabId = tabs[0].id;
                 chrome.scripting.executeScript({
@@ -397,12 +404,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let status = await eventChecker.getCurrentEventStatus();
         document.getElementById('eventStatus').innerText = status;
     };
-    
+
 
     const checkCurrentWebsite = () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const currentUrl = tabs[0].url;  // The URL of the active tab
-            
+
             // Call isBlocked with a callback that updates the state
             isBlockedWithCallback(currentUrl, (blocked) => {
                 editOnBlockedWebsite(blocked);  // Pass the result to update state
@@ -410,12 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const updateNextThreeEvents = async () => {
-        let nextEvents = await eventChecker.getNextThreeEvents();
-        let eventListText = nextEvents.map(event => `${event.summary} (${event.start.dateTime} - ${event.end.dateTime})`).join('\n');
-        document.getElementById('nextEvents').innerText = `Next 3 Events:\n${eventListText}`;
-    };
-    updateNextThreeEvents();
+    setInterval(threeEventsString, 3000);
+    threeEventsString();
     updateStatus();
     setInterval(updateStatus, 1000);  // Update every 1 second
     setInterval(checkCurrentWebsite, 1000); // Checks current website every second
