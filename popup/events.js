@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const detectCurr = async () => {
+        console.log('calling detectCurr-----');
         const token = await getAuthToken();
         const detectCurrHelper = new URLSearchParams({
             "orderBy": "startTime",
@@ -139,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return events;
     };
 
-
     // Next four events search params
     const detectNextFourSearchParams = new URLSearchParams({
         "orderBy": "startTime",
@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // detects the next three events not including the current one
     const detectNextThreeEvents = async () => {
+        console.log('calling detectnextThreeEvents');
         const currentEvent = await detectCurr();
         const useFirst = currentEvent === "No events";
         const nextFourEvents = await detectNextFourEvents();
@@ -204,6 +205,29 @@ document.addEventListener('DOMContentLoaded', () => {
         return event.summary + " (" + event.start.dateTime.substring(5, 10) + ", " + event.start.dateTime.substring(12, 16) + ")";
     }
 
+    const detectNextThreeEventsNew = async () => {
+        // const nextFourEvents = await detectNextFourEvents();
+        // console.log('nextFourEvents', nextFourEvents);
+        // let eventsToShow;
+        // const firstEvent = nextFourEvents[0];
+        // if (detectCurrentEvent(firstEvent)) {
+        //     eventsToShow = nextFourEvents.slice(1);
+        // } else {
+        //     eventsToShow = nextFourEvents.slice(0, 3);
+        // }
+
+        const res = [];
+        const currentEvent = await detectCurr();
+        let incr = 0;
+        if(currentEvent != "No events") incr = 1;
+        for (i = incr; i < i + 3; i++) {
+            res[i] = nextFourEvents[i];
+        }
+        return res;
+    }
+    const detectCurrentEvent = (event) => {
+        return new Date(event.start.dateTime) <= new Date();
+    }
 
     // takes in a list of 3 events and returns list of strings
     const threeEventsString = async () => {
